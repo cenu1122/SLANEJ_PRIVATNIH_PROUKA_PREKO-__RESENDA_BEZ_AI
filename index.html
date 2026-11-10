@@ -459,6 +459,21 @@ async function updateUserStatus(user, online) {
 // ==================================================
 
 loginForm.addEventListener("submit", async function(event) {
+  console.log("========== LOGIN DIJAGNOSTIKA ==========");
+
+console.log("Supabase URL:", SUPABASE_URL);
+
+console.log(
+  "API ključ postoji:",
+  SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_")
+);
+
+console.log(
+  "Supabase klijent postoji:",
+  !!supabase
+);
+
+console.log("Metoda prijave: signInWithPassword");
 
   event.preventDefault();
 
