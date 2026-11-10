@@ -9,7 +9,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -42,7 +44,9 @@ body {
   margin-bottom: 30px;
 }
 
-h2 { color: #123c69; }
+h2 {
+  color: #123c69;
+}
 
 label {
   display: block;
@@ -51,12 +55,19 @@ label {
   font-weight: bold;
 }
 
-input, textarea {
+input,
+textarea {
   width: 100%;
   padding: 13px;
   border: 1px solid #cbd5e1;
   border-radius: 7px;
   font-size: 15px;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid #93c5fd;
+  border-color: #2563eb;
 }
 
 textarea {
@@ -86,7 +97,9 @@ button:disabled {
   margin-top: 20px;
 }
 
-.primary:hover { background: #1d568e; }
+.primary:hover {
+  background: #1d568e;
+}
 
 .secondary {
   background: #e2e8f0;
@@ -97,6 +110,17 @@ button:disabled {
 .logout {
   background: #dc2626;
   color: white;
+}
+
+.password-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.password-wrapper button {
+  align-self: flex-end;
+  margin-top: 0;
 }
 
 .message {
@@ -121,7 +145,9 @@ button:disabled {
   color: #166534;
 }
 
-.hidden { display: none !important; }
+.hidden {
+  display: none !important;
+}
 
 .topbar {
   display: flex;
@@ -164,7 +190,10 @@ button:disabled {
 }
 
 @media (max-width: 600px) {
-  body { padding: 12px; }
+  body {
+    padding: 12px;
+  }
+
   .container {
     margin: 10px auto;
     padding: 20px;
@@ -180,6 +209,8 @@ button:disabled {
   <div class="logo">DOCBIZHUB</div>
   <div class="subtitle">Upravljanje i slanje poslovnih ponuda</div>
 
+  <!-- PRIJAVA -->
+
   <section id="loginPanel">
 
     <h2>Prijava na sistem</h2>
@@ -187,20 +218,52 @@ button:disabled {
     <form id="loginForm">
 
       <label for="email">Email adresa</label>
-      <input type="email" id="email"
-             autocomplete="username" required>
+
+      <input
+        type="email"
+        id="email"
+        value="admi@gnail.com"
+        autocomplete="username"
+        required
+      >
 
       <label for="password">Lozinka</label>
-      <input type="password" id="password"
-             autocomplete="current-password" required>
 
-      <button type="submit" class="primary" id="loginButton">
+      <div class="password-wrapper">
+
+        <input
+          type="password"
+          id="password"
+          autocomplete="current-password"
+          required
+        >
+
+        <button
+          type="button"
+          class="secondary"
+          id="togglePassword"
+          aria-label="Prikaži lozinku"
+        >
+          Prikaži lozinku
+        </button>
+
+      </div>
+
+      <button
+        type="submit"
+        class="primary"
+        id="loginButton"
+      >
         Prijavi se
       </button>
 
     </form>
 
-    <button type="button" class="secondary" id="resetButton">
+    <button
+      type="button"
+      class="secondary"
+      id="resetButton"
+    >
       Zaboravljena lozinka?
     </button>
 
@@ -213,43 +276,77 @@ button:disabled {
 
   </section>
 
+  <!-- ADMIN PANEL -->
+
   <section id="adminPanel" class="hidden">
 
     <div class="topbar">
+
       <div>
         <h2>Slanje poslovnih ponuda</h2>
         <div id="userInfo"></div>
       </div>
 
-      <button type="button" class="logout" id="logoutButton">
+      <button
+        type="button"
+        class="logout"
+        id="logoutButton"
+      >
         Odjava
       </button>
+
     </div>
 
     <form id="offerForm">
 
       <label for="primalac">Email adresa primaoca</label>
-      <input type="email" id="primalac"
-             placeholder="firma@example.com" required>
+
+      <input
+        type="email"
+        id="primalac"
+        placeholder="firma@example.com"
+        required
+      >
 
       <label for="posiljalac">Naziv pošiljaoca</label>
-      <input type="text" id="posiljalac"
-             value="DOCBIZHUB" required>
+
+      <input
+        type="text"
+        id="posiljalac"
+        value="DOCBIZHUB"
+        required
+      >
 
       <label for="subject">Naslov emaila</label>
-      <input type="text" id="subject"
-             placeholder="Poslovna ponuda za saradnju" required>
+
+      <input
+        type="text"
+        id="subject"
+        placeholder="Poslovna ponuda za saradnju"
+        required
+      >
 
       <label for="tekst">Tekst poslovne ponude</label>
-      <textarea id="tekst"
-        placeholder="Ovdje ručno unesite tekst svoje poslovne ponude..."
-        required></textarea>
 
-      <button type="button" class="secondary" id="previewButton">
+      <textarea
+        id="tekst"
+        placeholder="Ovdje ručno unesite tekst svoje poslovne ponude..."
+        required
+      ></textarea>
+
+      <button
+        type="button"
+        class="secondary"
+        id="previewButton"
+      >
         Pregled ponude
       </button>
 
-      <button type="submit" class="primary" id="sendButton">
+      <button
+        type="submit"
+        class="primary"
+        id="sendButton"
+      >
         Pošalji poslovnu ponudu
       </button>
 
@@ -268,13 +365,13 @@ button:disabled {
 </div>
 
 <script>
-"use strict";
-
-/* ==================================================
-   DOCBIZHUB – ZAŠTITA OD DUPLOG POKRETANJA
-================================================== */
-
 (function DOCBIZHUB_APP() {
+
+  "use strict";
+
+  /*
+   * ZAŠTITA OD DUPLOG POKRETANJA
+   */
 
   if (window.__DOCBIZHUB_APP_INITIALIZED__) {
     console.warn("DOCBIZHUB je već pokrenut.");
@@ -283,9 +380,9 @@ button:disabled {
 
   window.__DOCBIZHUB_APP_INITIALIZED__ = true;
 
-  /* ==================================================
-     SUPABASE KONFIGURACIJA
-  ================================================== */
+  /*
+   * SUPABASE KONFIGURACIJA
+   */
 
   const SUPABASE_URL =
     "https://uduwpvdjmanrgpumdrfh.supabase.co";
@@ -293,23 +390,30 @@ button:disabled {
   const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_IfX6dxz-ILfYK_3VgelcMw_tYOX0y45";
 
-  /* ==================================================
-     EMAIL KONFIGURACIJA
-  ================================================== */
+  /*
+   * EMAIL KONFIGURACIJA
+   *
+   * Ovdje unesi stvarni naziv Edge Function.
+   */
 
-  // Unesi naziv postojeće Supabase Edge Function.
+  const FUNCTION_NAME =
+    "UNESI_NAZIV_EDGE_FUNCTION";
 
-  const FUNCTION_NAME = "UNESI_NAZIV_EDGE_FUNCTION";
+  /*
+   * Ovdje unesi svoju verifikovanu domenu.
+   */
 
-  // Unesi verifikovanu domenu pošiljaoca.
+  const SENDER_DOMAIN =
+    "UNESI_SVOJU_DOMENU.BA";
 
-  const SENDER_DOMAIN = "UNESI_SVOJU_DOMENU.BA";
+  /*
+   * PROVJERA SUPABASE BIBLIOTEKE
+   */
 
-  /* ==================================================
-     PROVJERA SUPABASE BIBLIOTEKE
-  ================================================== */
-
-  if (!window.supabase || !window.supabase.createClient) {
+  if (
+    !window.supabase ||
+    typeof window.supabase.createClient !== "function"
+  ) {
 
     document.body.innerHTML =
       "<h2>Greška: Supabase biblioteka nije učitana.</h2>";
@@ -323,16 +427,20 @@ button:disabled {
   ) {
 
     document.body.innerHTML =
-      "<h2>Greška: Publishable API ključ nije ispravno postavljen.</h2>";
+      "<h2>Greška: Supabase API ključ nije ispravno postavljen.</h2>";
 
     throw new Error("Neispravan Supabase API ključ.");
   }
 
-  /* ==================================================
-     SUPABASE DIJAGNOSTIČKI FETCH
-  ================================================== */
+  /*
+   * ORIGINALNI FETCH
+   */
 
   const originalFetch = window.fetch.bind(window);
+
+  /*
+   * DIJAGNOSTIČKI FETCH
+   */
 
   async function diagnosticFetch(input, init) {
 
@@ -384,12 +492,13 @@ button:disabled {
     }
   }
 
-  /* ==================================================
-     KREIRANJE DOCBIZHUB SUPABASE KLIJENTA
-
-     NAPOMENA:
-     Koristimo DOCBIZ_SUPABASE, a ne supabase.
-  ================================================== */
+  /*
+   * KREIRANJE SUPABASE KLIJENTA
+   *
+   * VAŽNO:
+   * Ne deklariramo varijablu koja se zove supabase.
+   * Koristimo samo DOCBIZ_SUPABASE.
+   */
 
   const DOCBIZ_SUPABASE = window.supabase.createClient(
     SUPABASE_URL,
@@ -403,8 +512,6 @@ button:disabled {
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
-
-        // Poseban ključ sesije za DOCBIZHUB.
         storageKey: "docbizhub_auth_session"
       }
     }
@@ -412,49 +519,93 @@ button:disabled {
 
   console.log("DOCBIZHUB: Supabase klijent je kreiran.");
 
-  /* ==================================================
-     HTML ELEMENTI
-  ================================================== */
+  /*
+   * HTML ELEMENTI
+   */
 
-  const loginPanel = document.getElementById("loginPanel");
-  const adminPanel = document.getElementById("adminPanel");
+  const loginPanel =
+    document.getElementById("loginPanel");
 
-  const loginForm = document.getElementById("loginForm");
-  const offerForm = document.getElementById("offerForm");
+  const adminPanel =
+    document.getElementById("adminPanel");
 
-  const loginButton = document.getElementById("loginButton");
-  const sendButton = document.getElementById("sendButton");
+  const loginForm =
+    document.getElementById("loginForm");
 
-  const loginMessage = document.getElementById("loginMessage");
-  const status = document.getElementById("status");
+  const offerForm =
+    document.getElementById("offerForm");
+
+  const loginButton =
+    document.getElementById("loginButton");
+
+  const sendButton =
+    document.getElementById("sendButton");
+
+  const loginMessage =
+    document.getElementById("loginMessage");
+
+  const status =
+    document.getElementById("status");
 
   const diagnosticMessage =
     document.getElementById("diagnosticMessage");
 
-  const senderInput = document.getElementById("posiljalac");
+  const senderInput =
+    document.getElementById("posiljalac");
 
-  /* ==================================================
-     PRIKAZ PORUKA
-  ================================================== */
+  const passwordInput =
+    document.getElementById("password");
+
+  const togglePassword =
+    document.getElementById("togglePassword");
+
+  /*
+   * PRIKAZ I SAKRIVANJE LOZINKE
+   */
+
+  togglePassword.addEventListener("click", function() {
+
+    const currentlyHidden =
+      passwordInput.type === "password";
+
+    passwordInput.type =
+      currentlyHidden ? "text" : "password";
+
+    togglePassword.textContent =
+      currentlyHidden ? "Sakrij lozinku" : "Prikaži lozinku";
+
+    togglePassword.setAttribute(
+      "aria-label",
+      currentlyHidden ? "Sakrij lozinku" : "Prikaži lozinku"
+    );
+
+  });
+
+  /*
+   * PORUKE
+   */
 
   function showError(element, message) {
+
     element.textContent = message;
     element.className = "message error";
   }
 
   function showSuccess(element, message) {
+
     element.textContent = message;
     element.className = "message success";
   }
 
   function clearMessage(element) {
+
     element.textContent = "";
     element.className = "message";
   }
 
-  /* ==================================================
-     PRIKAZ PANELA
-  ================================================== */
+  /*
+   * PRIKAZ PANELA
+   */
 
   function showLogin() {
 
@@ -471,9 +622,9 @@ button:disabled {
       "Prijavljeni korisnik: " + (user.email || "");
   }
 
-  /* ==================================================
-     SISTEMSKA DIJAGNOSTIKA
-  ================================================== */
+  /*
+   * SISTEMSKA DIJAGNOSTIKA
+   */
 
   async function DOCBIZ_DIJAGNOSTIKA() {
 
@@ -500,7 +651,7 @@ button:disabled {
     check(
       "Supabase klijent",
       !!DOCBIZ_SUPABASE?.auth,
-      "Provjera kreiranog DOCBIZHUB klijenta."
+      "Provjera DOCBIZHUB klijenta."
     );
 
     check(
@@ -515,7 +666,9 @@ button:disabled {
       "Provjeren format, ne validnost ključa."
     );
 
-    /* PROVJERA AUTH SERVERA */
+    /*
+     * PROVJERA AUTH SERVERA
+     */
 
     try {
 
@@ -551,7 +704,9 @@ button:disabled {
       );
     }
 
-    /* PROVJERA SESIJE */
+    /*
+     * PROVJERA SESIJE
+     */
 
     try {
 
@@ -577,7 +732,9 @@ button:disabled {
       );
     }
 
-    /* PRIKAZ REZULTATA */
+    /*
+     * PRIKAZ REZULTATA
+     */
 
     const output = report.map(function(item) {
 
@@ -604,9 +761,9 @@ button:disabled {
     return report;
   }
 
-  /* ==================================================
-     AŽURIRANJE STATUSA KORISNIKA
-  ================================================== */
+  /*
+   * AŽURIRANJE STATUSA KORISNIKA
+   */
 
   async function updateUserStatus(user, online) {
 
@@ -618,11 +775,12 @@ button:disabled {
         .from("POSAO_KORISNICI")
         .update({
           IS_ONLINE: online,
-          LAST_SEEN: new Date().toLocaleDateString()
+          LAST_SEEN: new Date().toISOString()
         })
         .eq("USER", user.id);
 
       if (error) {
+
         console.warn(
           "Status korisnika nije ažuriran:",
           error.message
@@ -638,9 +796,9 @@ button:disabled {
     }
   }
 
-  /* ==================================================
-     PRIJAVA
-  ================================================== */
+  /*
+   * PRIJAVA
+   */
 
   loginForm.addEventListener("submit", async function(event) {
 
@@ -655,14 +813,14 @@ button:disabled {
       document.getElementById("email").value.trim();
 
     const password =
-      document.getElementById("password").value;
+      passwordInput.value;
 
     try {
 
       const { data, error } =
         await DOCBIZ_SUPABASE.auth.signInWithPassword({
-          email,
-          password
+          email: email,
+          password: password
         });
 
       if (error) throw error;
@@ -671,7 +829,10 @@ button:disabled {
 
       showAdmin(data.user);
 
-      showSuccess(status, "Uspješno ste prijavljeni.");
+      showSuccess(
+        status,
+        "Uspješno ste prijavljeni."
+      );
 
     } catch (error) {
 
@@ -689,9 +850,9 @@ button:disabled {
     }
   });
 
-  /* ==================================================
-     RESET LOZINKE
-  ================================================== */
+  /*
+   * RESET LOZINKE
+   */
 
   document.getElementById("resetButton").addEventListener(
     "click",
@@ -729,14 +890,17 @@ button:disabled {
 
       } catch (error) {
 
-        showError(loginMessage, error.message);
+        showError(
+          loginMessage,
+          "Greška: " + error.message
+        );
       }
     }
   );
 
-  /* ==================================================
-     PREGLED PONUDE
-  ================================================== */
+  /*
+   * PREGLED PONUDE
+   */
 
   document.getElementById("previewButton").addEventListener(
     "click",
@@ -770,9 +934,9 @@ button:disabled {
     }
   );
 
-  /* ==================================================
-     SLANJE EMAILA PREKO EDGE FUNCTION
-  ================================================== */
+  /*
+   * SLANJE EMAILA PREKO EDGE FUNCTION
+   */
 
   offerForm.addEventListener("submit", async function(event) {
 
@@ -794,7 +958,10 @@ button:disabled {
 
     if (!primalac || !senderName || !subject || !tekst) {
 
-      showError(status, "Molimo popunite sva polja.");
+      showError(
+        status,
+        "Molimo popunite sva polja."
+      );
 
       return;
     }
@@ -858,10 +1025,10 @@ button:disabled {
           {
             body: {
               action: "POSALJI",
-              primalac,
-              posiljalac,
-              subject,
-              tekst
+              primalac: primalac,
+              posiljalac: posiljalac,
+              subject: subject,
+              tekst: tekst
             }
           }
         );
@@ -903,9 +1070,9 @@ button:disabled {
     }
   });
 
-  /* ==================================================
-     ODJAVA
-  ================================================== */
+  /*
+   * ODJAVA
+   */
 
   document.getElementById("logoutButton").addEventListener(
     "click",
@@ -946,9 +1113,9 @@ button:disabled {
     }
   );
 
-  /* ==================================================
-     PRAĆENJE SESIJE
-  ================================================== */
+  /*
+   * PRAĆENJE SESIJE
+   */
 
   DOCBIZ_SUPABASE.auth.onAuthStateChange(
     function(event, session) {
@@ -966,9 +1133,9 @@ button:disabled {
     }
   );
 
-  /* ==================================================
-     PROVJERA POSTOJEĆE SESIJE
-  ================================================== */
+  /*
+   * PROVJERA POSTOJEĆE SESIJE
+   */
 
   async function initialize() {
 
@@ -1003,20 +1170,19 @@ button:disabled {
     }
   }
 
-  /* ==================================================
-     POKRETANJE SISTEMA
-  ================================================== */
+  /*
+   * POKRETANJE SISTEMA
+   */
 
   initialize();
 
   DOCBIZ_DIJAGNOSTIKA();
 
   console.log(
-    "DOCBIZHUB: Sistem je uspješno inicijalizovan."
+    "DOCBIZHUB: Sistem je inicijalizovan."
   );
 
-})(); 
-
+})();
 </script>
 
 </body>
