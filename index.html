@@ -370,6 +370,114 @@ console.log("DOCBIZHUB: Dijagnostika je aktivna.");
 console.log("Supabase klijent:", !!supabase);
 console.log("Publishable API ključ postavljen:", !!SUPABASE_PUBLISHABLE_KEY);
 
+  
+
+async function DOCBIZ_DIAGNOSTIKA() {
+
+  console.clear();
+
+  console.group("DOCBIZHUB DIJAGNOSTIKA");
+
+  const report = [];
+
+  function check(name, ok, detail) {
+    report.push({
+      PROVJERA: name,
+      STATUS: ok ? "ISPRAVNO" : "GREŠKA",
+      DETALJI: detail
+    });
+
+    console[ok ? "log" : "error"](
+      (ok ? "✓ " : "✗ ") + name + ": " + detail
+    );
+  }
+
+  check(
+    "Supabase biblioteka",
+    !!window.supabase?.createClient,
+    "Provjera učitavanja biblioteke"
+  );
+
+  check(
+    "Supabase klijent",
+    !!supabase?.auth,
+    "Provjera kreiranog klijenta"
+  );
+
+  check(
+    "Supabase URL",
+    SUPABASE_URL ===
+      "https://uduwpvdjmanrgpumdrfh.supabase.co",
+    "Provjera adrese projekta"
+  );
+
+  check(
+    "Publishable ključ",
+    SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_"),
+    "Provjera formata ključa, ne njegove validnosti"
+  );
+
+  try {
+    const response = await fetch(
+      SUPABASE_URL + "/auth/v1/health",
+      {
+        method: "GET",
+        headers: {
+          apikey: SUPABASE_PUBLISHABLE_KEY
+        }
+      }
+    );
+
+    check(
+      "Supabase Auth dostupnost",
+      response.ok,
+      "HTTP " + response.status
+    );
+
+    if (!response.ok) {
+      console.error(
+        "Auth odgovor:",
+        await response.text()
+      );
+    }
+
+  } catch (error) {
+    check(
+      "Supabase Auth dostupnost",
+      false,
+      error.message
+    );
+  }
+
+  try {
+    const { data, error } =
+      await supabase.auth.getSession();
+
+    check(
+      "Provjera sesije",
+      !error,
+      error ? error.message : (
+        data.session ? "Aktivna sesija" : "Nema aktivne sesije"
+      )
+    );
+
+  } catch (error) {
+    check(
+      "Provjera sesije",
+      false,
+      error.message
+    );
+  }
+
+  console.table(report);
+
+  console.groupEnd();
+
+  return report;
+}
+
+
+
 // ==================================================
 // HTML ELEMENTI
 // ==================================================
