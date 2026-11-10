@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="bs">
 <head>
@@ -74,6 +73,11 @@ button {
   font-weight: bold;
 }
 
+button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
 .primary {
   background: #123c69;
   color: white;
@@ -100,6 +104,8 @@ button {
   border-radius: 7px;
   display: none;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
 }
 
 .error {
@@ -132,6 +138,28 @@ button {
   color: #1e40af;
   line-height: 1.5;
   margin-top: 20px;
+}
+
+.diagnostic {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.diagnostic h3 {
+  margin-top: 0;
+  color: #123c69;
+}
+
+.diagnostic pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 0;
 }
 </style>
 </head>
@@ -176,6 +204,14 @@ button {
     </button>
 
     <div id="loginMessage" class="message"></div>
+
+    <!-- DIJAGNOSTIKA SE PRIKAZUJE NA STRANICI -->
+    <div class="diagnostic">
+      <h3>DOCBIZHUB – Sistemska dijagnostika</h3>
+      <div id="diagnosticMessage">
+        Provjera sistema u toku...
+      </div>
+    </div>
 
   </section>
 
@@ -264,14 +300,14 @@ const SUPABASE_PUBLISHABLE_KEY =
 // POSTAVKE EMAIL SISTEMA
 // ==================================================
 
-// OVDJE UPIŠI TAČAN NAZIV POSTOJEĆE EDGE FUNCTION
+// UPIŠI TAČAN NAZIV SVOJE POSTOJEĆE EDGE FUNCTION
 const FUNCTION_NAME = "UNESI_NAZIV_EDGE_FUNCTION";
 
-// OVDJE UPIŠI VERIFIKOVANU DOMENU POŠILJAOCA
+// UPIŠI VERIFIKOVANU DOMENU POŠILJAOCA
 const SENDER_DOMAIN = "UNESI_SVOJU_DOMENU.BA";
 
 // ==================================================
-// PROVJERA I KREIRANJE SUPABASE KLIJENTA
+// PROVJERA SUPABASE BIBLIOTEKE
 // ==================================================
 
 if (!window.supabase || !window.supabase.createClient) {
@@ -285,10 +321,11 @@ if (
   !SUPABASE_PUBLISHABLE_KEY ||
   !SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_")
 ) {
+  document.body.innerHTML =
+    "<h2>Greška: Publishable API ključ nije ispravno postavljen.</h2>";
+
   throw new Error("Supabase Publishable API ključ nije ispravno postavljen.");
 }
-
-// KREIRA SE SAMO JEDAN SUPABASE KLIJENT
 
 // ==================================================
 // DIJAGNOSTIKA SUPABASE ZAHTJEVA
@@ -301,35 +338,34 @@ async function diagnosticFetch(input, init) {
   const request = new Request(input, init);
   const url = new URL(request.url);
 
-  // Pratimo samo zahtjeve prema našem Supabase projektu
-  const isSupabase = url.hostname.endsWith(".supabase.co");
-
-  if (!isSupabase) {
+  if (!url.hostname.endsWith(".supabase.co")) {
     return originalFetch(request);
   }
-
-  const apikeyPresent = request.headers.has("apikey");
-  const authorizationPresent = request.headers.has("authorization");
 
   console.group("SUPABASE DIJAGNOSTIKA");
 
   console.log("URL:", url.origin + url.pathname);
   console.log("Metoda:", request.method);
-  console.log("API KEY zaglavlje:", apikeyPresent ? "POSTOJI" : "NEDOSTAJE");
-  console.log("Authorization zaglavlje:", authorizationPresent ? "POSTOJI" : "NEDOSTAJE");
-
-  let response;
+  console.log(
+    "API KEY zaglavlje:",
+    request.headers.has("apikey") ? "POSTOJI" : "NEDOSTAJE"
+  );
+  console.log(
+    "Authorization zaglavlje:",
+    request.headers.has("authorization") ? "POSTOJI" : "NEDOSTAJE"
+  );
 
   try {
 
-    response = await originalFetch(request);
+    const response = await originalFetch(request);
 
     console.log("HTTP STATUS:", response.status);
-    console.log("Zahtjev uspješan:", response.ok);
 
     if (!response.ok) {
-      const errorText = await response.clone().text();
-      console.error("ODGOVOR SERVERA:", errorText);
+      console.error(
+        "ODGOVOR SERVERA:",
+        await response.clone().text()
+      );
     }
 
     console.groupEnd();
@@ -364,119 +400,7 @@ const supabase = window.supabase.createClient(
   }
 );
 
-console.log("DOCBIZHUB: Dijagnostika je aktivna.");
-
- console.log("Supabase biblioteka:", !!window.supabase);
-console.log("Supabase klijent:", !!supabase);
-console.log("Publishable API ključ postavljen:", !!SUPABASE_PUBLISHABLE_KEY);
-
-  
-
-async function DOCBIZ_DIAGNOSTIKA() {
-
-  console.clear();
-
-  console.group("DOCBIZHUB DIJAGNOSTIKA");
-
-  const report = [];
-
-  function check(name, ok, detail) {
-    report.push({
-      PROVJERA: name,
-      STATUS: ok ? "ISPRAVNO" : "GREŠKA",
-      DETALJI: detail
-    });
-
-    console[ok ? "log" : "error"](
-      (ok ? "✓ " : "✗ ") + name + ": " + detail
-    );
-  }
-
-  check(
-    "Supabase biblioteka",
-    !!window.supabase?.createClient,
-    "Provjera učitavanja biblioteke"
-  );
-
-  check(
-    "Supabase klijent",
-    !!supabase?.auth,
-    "Provjera kreiranog klijenta"
-  );
-
-  check(
-    "Supabase URL",
-    SUPABASE_URL ===
-      "https://uduwpvdjmanrgpumdrfh.supabase.co",
-    "Provjera adrese projekta"
-  );
-
-  check(
-    "Publishable ključ",
-    SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_"),
-    "Provjera formata ključa, ne njegove validnosti"
-  );
-
-  try {
-    const response = await fetch(
-      SUPABASE_URL + "/auth/v1/health",
-      {
-        method: "GET",
-        headers: {
-          apikey: SUPABASE_PUBLISHABLE_KEY
-        }
-      }
-    );
-
-    check(
-      "Supabase Auth dostupnost",
-      response.ok,
-      "HTTP " + response.status
-    );
-
-    if (!response.ok) {
-      console.error(
-        "Auth odgovor:",
-        await response.text()
-      );
-    }
-
-  } catch (error) {
-    check(
-      "Supabase Auth dostupnost",
-      false,
-      error.message
-    );
-  }
-
-  try {
-    const { data, error } =
-      await supabase.auth.getSession();
-
-    check(
-      "Provjera sesije",
-      !error,
-      error ? error.message : (
-        data.session ? "Aktivna sesija" : "Nema aktivne sesije"
-      )
-    );
-
-  } catch (error) {
-    check(
-      "Provjera sesije",
-      false,
-      error.message
-    );
-  }
-
-  console.table(report);
-
-  console.groupEnd();
-
-  return report;
-}
-
-
+console.log("DOCBIZHUB: Supabase klijent je kreiran.");
 
 // ==================================================
 // HTML ELEMENTI
@@ -493,6 +417,9 @@ const sendButton = document.getElementById("sendButton");
 
 const loginMessage = document.getElementById("loginMessage");
 const status = document.getElementById("status");
+
+const diagnosticMessage =
+  document.getElementById("diagnosticMessage");
 
 const senderInput = document.getElementById("posiljalac");
 
@@ -533,6 +460,145 @@ function showAdmin(user) {
 }
 
 // ==================================================
+// SISTEMSKA DIJAGNOSTIKA
+// ==================================================
+
+async function DOCBIZ_DIJAGNOSTIKA() {
+
+  const report = [];
+
+  function check(name, ok, detail) {
+
+    report.push({
+      PROVJERA: name,
+      STATUS: ok ? "ISPRAVNO" : "GREŠKA",
+      DETALJI: detail
+    });
+  }
+
+  diagnosticMessage.textContent =
+    "Provjera Supabase sistema u toku...";
+
+  diagnosticMessage.className = "message";
+  diagnosticMessage.style.display = "block";
+
+  check(
+    "Supabase biblioteka",
+    !!window.supabase?.createClient,
+    "Provjera učitavanja biblioteke"
+  );
+
+  check(
+    "Supabase klijent",
+    !!supabase?.auth,
+    "Provjera kreiranog klijenta"
+  );
+
+  check(
+    "Supabase URL",
+    SUPABASE_URL ===
+      "https://uduwpvdjmanrgpumdrfh.supabase.co",
+    SUPABASE_URL
+  );
+
+  check(
+    "Format API ključa",
+    SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_"),
+    "Provjeren je format, ne validnost ključa."
+  );
+
+  // PROVJERA SUPABASE AUTH SERVERA
+
+  try {
+
+    const response = await fetch(
+      SUPABASE_URL + "/auth/v1/health",
+      {
+        method: "GET",
+        headers: {
+          apikey: SUPABASE_PUBLISHABLE_KEY
+        }
+      }
+    );
+
+    check(
+      "Supabase Auth server",
+      response.ok,
+      "HTTP " + response.status
+    );
+
+    if (!response.ok) {
+      const details = await response.text();
+
+      console.error(
+        "SUPABASE AUTH ODGOVOR:",
+        details
+      );
+    }
+
+  } catch (error) {
+
+    check(
+      "Supabase Auth server",
+      false,
+      error.message
+    );
+  }
+
+  // PROVJERA SESIJE
+
+  try {
+
+    const { data, error } =
+      await supabase.auth.getSession();
+
+    check(
+      "Auth sesija",
+      !error,
+      error
+        ? error.message
+        : data.session
+          ? "Aktivna sesija"
+          : "Nema aktivne sesije"
+    );
+
+  } catch (error) {
+
+    check(
+      "Auth sesija",
+      false,
+      error.message
+    );
+  }
+
+  // PRIKAZ REZULTATA NA STRANICI
+
+  const output = report.map(function(item) {
+
+    return (
+      (item.STATUS === "ISPRAVNO" ? "✓ " : "✗ ") +
+      item.STATUS + ": " +
+      item.PROVJERA + "\n" +
+      item.DETALJI
+    );
+
+  }).join("\n\n");
+
+  diagnosticMessage.textContent = output;
+
+  const hasError = report.some(function(item) {
+    return item.STATUS === "GREŠKA";
+  });
+
+  diagnosticMessage.className =
+    hasError ? "message error" : "message success";
+
+  console.table(report);
+
+  return report;
+}
+
+// ==================================================
 // AŽURIRANJE STATUSA KORISNIKA
 // ==================================================
 
@@ -567,21 +633,6 @@ async function updateUserStatus(user, online) {
 // ==================================================
 
 loginForm.addEventListener("submit", async function(event) {
-  console.log("========== LOGIN DIJAGNOSTIKA ==========");
-
-console.log("Supabase URL:", SUPABASE_URL);
-
-console.log(
-  "API ključ postoji:",
-  SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_")
-);
-
-console.log(
-  "Supabase klijent postoji:",
-  !!supabase
-);
-
-console.log("Metoda prijave: signInWithPassword");
 
   event.preventDefault();
 
@@ -590,15 +641,19 @@ console.log("Metoda prijave: signInWithPassword");
   loginButton.disabled = true;
   loginButton.textContent = "Prijava u toku...";
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  const email =
+    document.getElementById("email").value.trim();
+
+  const password =
+    document.getElementById("password").value;
 
   try {
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
     if (error) throw error;
 
@@ -609,6 +664,8 @@ console.log("Metoda prijave: signInWithPassword");
     showSuccess(status, "Uspješno ste prijavljeni.");
 
   } catch (error) {
+
+    console.error("LOGIN GREŠKA:", error);
 
     showError(
       loginMessage,
@@ -632,7 +689,8 @@ document.getElementById("resetButton").addEventListener(
   "click",
   async function() {
 
-    const email = document.getElementById("email").value.trim();
+    const email =
+      document.getElementById("email").value.trim();
 
     if (!email) {
       showError(
@@ -644,12 +702,13 @@ document.getElementById("resetButton").addEventListener(
 
     try {
 
-      const { error } = await supabase.auth.resetPasswordForEmail(
-        email,
-        {
-          redirectTo: window.location.origin
-        }
-      );
+      const { error } =
+        await supabase.auth.resetPasswordForEmail(
+          email,
+          {
+            redirectTo: window.location.origin
+          }
+        );
 
       if (error) throw error;
 
@@ -703,7 +762,7 @@ document.getElementById("previewButton").addEventListener(
 );
 
 // ==================================================
-// SLANJE EMAILA PREKO SUPABASE EDGE FUNCTION
+// SLANJE EMAILA PREKO EDGE FUNCTION
 // ==================================================
 
 offerForm.addEventListener("submit", async function(event) {
@@ -715,7 +774,8 @@ offerForm.addEventListener("submit", async function(event) {
   const primalac =
     document.getElementById("primalac").value.trim();
 
-  const senderName = senderInput.value.trim();
+  const senderName =
+    senderInput.value.trim();
 
   const subject =
     document.getElementById("subject").value.trim();
@@ -772,25 +832,21 @@ offerForm.addEventListener("submit", async function(event) {
 
   try {
 
-    // Supabase SDK automatski dodaje API ključ
-    // i token aktivne sesije u zahtjev.
-
-    const { data, error } = await supabase.functions.invoke(
-      FUNCTION_NAME,
-      {
-        body: {
-          action: "POSALJI",
-          primalac,
-          posiljalac,
-          subject,
-          tekst
+    const { data, error } =
+      await supabase.functions.invoke(
+        FUNCTION_NAME,
+        {
+          body: {
+            action: "POSALJI",
+            primalac,
+            posiljalac,
+            subject,
+            tekst
+          }
         }
-      }
-    );
+      );
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     if (!data || data.success !== true) {
       throw new Error(
@@ -810,7 +866,7 @@ offerForm.addEventListener("submit", async function(event) {
 
   } catch (error) {
 
-    console.error("Greška pri slanju:", error);
+    console.error("GREŠKA PRI SLANJU:", error);
 
     showError(
       status,
@@ -891,7 +947,8 @@ async function initialize() {
 
   try {
 
-    const { data, error } = await supabase.auth.getSession();
+    const { data, error } =
+      await supabase.auth.getSession();
 
     if (error) throw error;
 
@@ -916,7 +973,12 @@ async function initialize() {
 
 }
 
+// ==================================================
+// POKRETANJE SISTEMA I DIJAGNOSTIKE
+// ==================================================
+
 initialize();
+DOCBIZ_DIJAGNOSTIKA();
 
 </script>
 
