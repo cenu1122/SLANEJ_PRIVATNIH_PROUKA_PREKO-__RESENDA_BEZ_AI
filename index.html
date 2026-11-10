@@ -289,10 +289,73 @@ if (
 }
 
 // KREIRA SE SAMO JEDAN SUPABASE KLIJENT
+
+// ==================================================
+// DIJAGNOSTIKA SUPABASE ZAHTJEVA
+// ==================================================
+
+const originalFetch = window.fetch.bind(window);
+
+async function diagnosticFetch(input, init) {
+
+  const request = new Request(input, init);
+  const url = new URL(request.url);
+
+  // Pratimo samo zahtjeve prema našem Supabase projektu
+  const isSupabase = url.hostname.endsWith(".supabase.co");
+
+  if (!isSupabase) {
+    return originalFetch(request);
+  }
+
+  const apikeyPresent = request.headers.has("apikey");
+  const authorizationPresent = request.headers.has("authorization");
+
+  console.group("SUPABASE DIJAGNOSTIKA");
+
+  console.log("URL:", url.origin + url.pathname);
+  console.log("Metoda:", request.method);
+  console.log("API KEY zaglavlje:", apikeyPresent ? "POSTOJI" : "NEDOSTAJE");
+  console.log("Authorization zaglavlje:", authorizationPresent ? "POSTOJI" : "NEDOSTAJE");
+
+  let response;
+
+  try {
+
+    response = await originalFetch(request);
+
+    console.log("HTTP STATUS:", response.status);
+    console.log("Zahtjev uspješan:", response.ok);
+
+    if (!response.ok) {
+      const errorText = await response.clone().text();
+      console.error("ODGOVOR SERVERA:", errorText);
+    }
+
+    console.groupEnd();
+
+    return response;
+
+  } catch (error) {
+
+    console.error("FETCH GREŠKA:", error);
+    console.groupEnd();
+
+    throw error;
+  }
+}
+
+// ==================================================
+// KREIRANJE SUPABASE KLIJENTA
+// ==================================================
+
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY,
   {
+    global: {
+      fetch: diagnosticFetch
+    },
     auth: {
       autoRefreshToken: true,
       persistSession: true,
@@ -301,7 +364,9 @@ const supabase = window.supabase.createClient(
   }
 );
 
-console.log("Supabase biblioteka:", !!window.supabase);
+console.log("DOCBIZHUB: Dijagnostika je aktivna.");
+
+ console.log("Supabase biblioteka:", !!window.supabase);
 console.log("Supabase klijent:", !!supabase);
 console.log("Publishable API ključ postavljen:", !!SUPABASE_PUBLISHABLE_KEY);
 
