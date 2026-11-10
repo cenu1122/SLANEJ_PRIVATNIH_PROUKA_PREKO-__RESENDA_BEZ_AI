@@ -636,13 +636,19 @@ supabase.auth.onAuthStateChange(function(event, session) {
 // PROVJERA POSTOJEĆE SESIJE
 // ==================================================
 
+
 async function initialize() {
+  console.log("DOCBIZHUB: Pokretanje stranice.");
 
   try {
-
     const { data, error } = await supabase.auth.getSession();
 
-    if (error) throw error;
+    console.log("SUPABASE SESSION:", data);
+
+    if (error) {
+      console.error("SESSION ERROR:", error);
+      throw error;
+    }
 
     if (data.session && data.session.user) {
       showAdmin(data.session.user);
@@ -651,16 +657,15 @@ async function initialize() {
     }
 
   } catch (error) {
+    console.error("INITIALIZE ERROR:", error);
 
-    console.error("Greška pri pokretanju:", error);
+    showLogin();
 
     showError(
       loginMessage,
-      "Nije moguće povezati se sa sistemom: " + error.message
+      "Greška pri povezivanju: " + error.message
     );
-
   }
-
 }
 
 initialize();
