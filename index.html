@@ -292,24 +292,11 @@ if (!window.supabase || !window.supabase.createClient) {
 
 const { createClient } = window.supabase;
 
-const supabase = createClient(
+const supabase = window.supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_ANON_KEY,
-  {
-    global: {
-      headers: {
-        apikey: SUPABASE_ANON_KEY
-      }
-    },
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  }
+  SUPABASE_ANON_KEY
 );
-
-
+    
 // ==================================================
 // HTML ELEMENTI
 // ==================================================
