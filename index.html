@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DOCBIZHUB - Administracija i slanje emailova</title>
+<title>DOCBIZHUB - Poslovne ponude</title>
 
 <style>
 * {
@@ -13,13 +13,14 @@
 
 body {
   margin: 0;
-  padding: 25px;
+  padding: 20px;
   font-family: Arial, sans-serif;
   background: #f3f5f9;
+  color: #172b4d;
 }
 
 .container {
-  max-width: 650px;
+  max-width: 700px;
   margin: 30px auto;
   padding: 28px;
   background: white;
@@ -27,8 +28,7 @@ body {
   box-shadow: 0 5px 25px rgba(0,0,0,.08);
 }
 
-h2 {
-  margin-top: 0;
+h1, h2 {
   color: #172b4d;
 }
 
@@ -54,22 +54,26 @@ input:focus, textarea:focus {
 }
 
 textarea {
-  min-height: 220px;
+  min-height: 240px;
   resize: vertical;
   line-height: 1.6;
 }
 
 button {
   width: 100%;
-  margin-top: 23px;
+  margin-top: 20px;
   padding: 15px;
   border: none;
   border-radius: 8px;
   background: #2563eb;
   color: white;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
+}
+
+button:hover {
+  background: #1749b8;
 }
 
 button:disabled {
@@ -77,12 +81,27 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.logout-button {
+.logout {
   background: #475467;
-  margin-top: 10px;
 }
 
-#status, #loginStatus {
+.logout:hover {
+  background: #344054;
+}
+
+.preview-button {
+  background: #0f766e;
+}
+
+.preview-button:hover {
+  background: #115e59;
+}
+
+.panel {
+  display: none;
+}
+
+.message {
   display: none;
   margin-top: 18px;
   padding: 13px;
@@ -92,28 +111,33 @@ button:disabled {
 }
 
 .success {
-  display: block !important;
+  display: block;
   background: #dcfce7;
   color: #166534;
 }
 
 .error {
-  display: block !important;
+  display: block;
   background: #fee2e2;
   color: #991b1b;
 }
 
-#adminPanel {
-  display: none;
+.info {
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
-#loginPanel {
-  display: block;
+.account {
+  padding: 13px;
+  margin: 18px 0;
+  background: #f3f6fb;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
 }
 
 .sender-row {
   display: flex;
-  align-items: stretch;
 }
 
 .sender-row input {
@@ -137,10 +161,19 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
-.info {
-  color: #667085;
-  font-size: 13px;
-  line-height: 1.5;
+@media(max-width:500px) {
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  .sender-domain {
+    padding: 0 7px;
+    font-size: 13px;
+  }
 }
 </style>
 </head>
@@ -149,127 +182,169 @@ button:disabled {
 
 <div class="container">
 
-<!-- ADMINISTRATORSKA PRIJAVA -->
+  <!-- PRIJAVA -->
 
-<div id="loginPanel">
+  <div id="loginPanel">
 
-  <h2>DOCBIZHUB - Administratorska prijava</h2>
+    <h1>DOCBIZHUB</h1>
 
-  <p>Prijavi se svojim administratorskim nalogom.</p>
+    <h2>Prijava administratora</h2>
 
-  <form id="loginForm">
+    <p>Prijavite se svojim korisničkim računom.</p>
 
-    <label>Administratorski email</label>
-    <input
-      type="email"
-      id="adminEmail"
-     value="admin@gnail.com"
-      required
-      autocomplete="username"
+    <form id="loginForm">
+
+      <label>Email adresa</label>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Unesite email adresu"
+        required
+        autocomplete="username"
+      >
+
+      <label>Lozinka</label>
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Unesite lozinku"
+        required
+        autocomplete="current-password"
+      >
+
+      <button type="submit" id="loginButton">
+        PRIJAVI SE
+      </button>
+
+    </form>
+
+    <button
+      type="button"
+      id="forgotButton"
+      class="preview-button"
     >
-
-    <label>Lozinka</label>
-    <input
-      type="password"
-      id="adminPassword"
-      placeholder="Unesi svoju lozinku"
-      required
-      autocomplete="current-password"
-    >
-
-    <button type="submit" id="loginButton">
-      PRIJAVI SE
+      ZABORAVLJENA LOZINKA
     </button>
 
-  </form>
+    <div id="loginMessage" class="message"></div>
 
-  <div id="loginStatus"></div>
+    <p class="info">
+      Prijava se obavlja putem Supabase sistema.
+      Lozinka se ne pohranjuje u lokalnu memoriju.
+    </p>
 
-  <p class="info">
-    Prijava se pamti putem Supabase sesije.
-    Lozinka se ne čuva kao običan tekst u localStorage.
-  </p>
-
-</div>
+  </div>
 
 
-<!-- ADMINISTRATORSKI PANEL -->
+  <!-- PANEL ZA PONUDE -->
 
-<div id="adminPanel">
+  <div id="adminPanel" class="panel">
 
-  <h2>Slanje emaila firmama</h2>
+    <h1>DOCBIZHUB</h1>
 
-  <p>
-    Dobro došao u DOCBIZHUB administratorski panel.
-    Email će biti poslan tačno onako kako ga napišeš.
-  </p>
+    <h2>Priprema i slanje poslovnih ponuda</h2>
 
-  <p class="info">
-    Prijavljen administrator:
-    <strong id="loggedInEmail"></strong>
-  </p>
+    <p>
+      Ovdje možete pripremiti poslovnu ponudu
+      i poslati je odabranoj firmi.
+    </p>
 
-  <form id="emailForm">
+    <div class="account">
+      Prijavljeni administrator:
+      <strong id="loggedInEmail"></strong>
+    </div>
 
-    <label>Email primaoca (firma)</label>
-    <input
-      type="email"
-      id="primalac"
-      placeholder="firma@example.com"
-      required
-    >
+    <form id="offerForm">
 
-    <label>Naziv adrese pošiljaoca</label>
+      <label>Email adresa firme</label>
 
-    <div class="sender-row">
       <input
-        type="text"
-        id="posiljalac"
-        placeholder="ponude"
-        pattern="[a-zA-Z0-9._-]+"
+        type="email"
+        id="primalac"
+        placeholder="firma@example.com"
         required
       >
 
-      <span class="sender-domain">@docbizhub.com</span>
-    </div>
+      <label>Adresa pošiljaoca</label>
 
-    <div class="preview">
-      Adresa pošiljaoca:
-      <strong id="emailPreview">ponude@docbizhub.com</strong>
-    </div>
+      <div class="sender-row">
 
-    <label>Naslov emaila</label>
-    <input
-      type="text"
-      id="subject"
-      placeholder="Poslovna ponuda"
-      required
+        <input
+          type="text"
+          id="posiljalac"
+          value="ponude"
+          pattern="[a-zA-Z0-9._-]+"
+          maxlength="64"
+          required
+        >
+
+        <span class="sender-domain">
+          @docbizhub.com
+        </span>
+
+      </div>
+
+      <div class="preview">
+        Adresa pošiljaoca:
+        <strong id="emailPreview">
+          ponude@docbizhub.com
+        </strong>
+      </div>
+
+      <label>Naslov poslovne ponude</label>
+
+      <input
+        type="text"
+        id="subject"
+        placeholder="Ponuda za poslovnu saradnju"
+        maxlength="180"
+        required
+      >
+
+      <label>Tekst poslovne ponude</label>
+
+      <textarea
+        id="tekst"
+        placeholder="Ovdje napišite poslovnu ponudu..."
+        maxlength="20000"
+        required
+      ></textarea>
+
+      <button
+        type="button"
+        id="previewButton"
+        class="preview-button"
+      >
+        PREGLEDAJ PONUDU
+      </button>
+
+      <button
+        type="submit"
+        id="sendButton"
+      >
+        POŠALJI PONUDU FIRMI
+      </button>
+
+    </form>
+
+    <div id="status" class="message"></div>
+
+    <p class="info">
+      Ponuda se šalje tek nakon vaše potvrde.
+      Sistem ne generiše tekst pomoću umjetne inteligencije.
+    </p>
+
+    <button
+      type="button"
+      id="logoutButton"
+      class="logout"
     >
-
-    <label>Tekst emaila</label>
-    <textarea
-      id="tekst"
-      placeholder="Napiši tačno šta želiš poslati firmi..."
-      required
-    ></textarea>
-
-    <button type="submit" id="sendButton">
-      POŠALJI EMAIL FIRMI
+      ODJAVI SE
     </button>
 
-  </form>
-
-  <div id="status"></div>
-
-  <button
-    type="button"
-    class="logout-button"
-    id="logoutButton"
-  >
-    ODJAVI SE
-  </button>
-
-</div>
+  </div>
 
 </div>
 
@@ -280,27 +355,28 @@ import { createClient } from
 "https://esm.sh/@supabase/supabase-js@2";
 
 
-// SUPABASE PODACI
+// ==================================================
+// SUPABASE KONFIGURACIJA
+// ==================================================
 
 const SUPABASE_URL =
-  "https://uduwpvdjmanrgpumdrfh.supabase.co";
+"https://uduwpvdjmanrgpumdrfh.supabase.co";
 
 const SUPABASE_ANON_KEY =
-  "sb_publishable_IfX6dxz-ILfYK_3VgelcMw_tYOX0y45";
+"sb_publishable_IfX6dxz-ILfYK_3VgelcMw_tYOX0y45";
 
 
-// DOZVOLJENI ADMINISTRATOR
-
-const ADMIN_EMAIL = "admin@gnail.com";
-
-
-// EDGE FUNCTION
+// ==================================================
+// POSTOJEĆA EDGE FUNCTION ZA SLANJE EMAILA
+// ==================================================
 
 const FUNCTION_NAME =
-  "SALJI_MAIL_FIRMAMA_BEZ_AI_GENERISANJA_PORUKA";
+"SALJI_MAIL_FIRMAMA_BEZ_AI_GENERISANJA_PORUKA";
 
 
+// ==================================================
 // SUPABASE CLIENT
+// ==================================================
 
 const supabase = createClient(
   SUPABASE_URL,
@@ -315,212 +391,270 @@ const supabase = createClient(
 );
 
 
+// ==================================================
 // HTML ELEMENTI
+// ==================================================
 
 const loginPanel =
-  document.getElementById("loginPanel");
+document.getElementById("loginPanel");
 
 const adminPanel =
-  document.getElementById("adminPanel");
+document.getElementById("adminPanel");
 
 const loginForm =
-  document.getElementById("loginForm");
+document.getElementById("loginForm");
+
+const offerForm =
+document.getElementById("offerForm");
 
 const loginButton =
-  document.getElementById("loginButton");
-
-const loginStatus =
-  document.getElementById("loginStatus");
-
-const logoutButton =
-  document.getElementById("logoutButton");
-
-const form =
-  document.getElementById("emailForm");
+document.getElementById("loginButton");
 
 const sendButton =
-  document.getElementById("sendButton");
+document.getElementById("sendButton");
+
+const loginMessage =
+document.getElementById("loginMessage");
 
 const status =
-  document.getElementById("status");
+document.getElementById("status");
 
-const posiljalacInput =
-  document.getElementById("posiljalac");
-
-
-// ČUVANJE EMAIL ADRESE POŠILJAOCA
-
-const SACUVANI_EMAIL_KEY =
-  "docbizhub_posiljalac_email";
-
-const sacuvaniEmail =
-  localStorage.getItem(SACUVANI_EMAIL_KEY);
-
-if (
-  sacuvaniEmail &&
-  /^[a-z0-9._-]+$/i.test(sacuvaniEmail)
-) {
-  posiljalacInput.value = sacuvaniEmail;
-}
+const senderInput =
+document.getElementById("posiljalac");
 
 
-// PRIKAZ ADRESE POŠILJAOCA
+// ==================================================
+// PRIKAZ PORUKA
+// ==================================================
 
-function prikaziAdresu() {
+function showError(element, message) {
 
-  const naziv =
-    posiljalacInput.value.trim().toLowerCase();
-
-  document.getElementById("emailPreview").textContent =
-    (naziv || "ponude") + "@docbizhub.com";
-}
-
-prikaziAdresu();
-
-posiljalacInput.addEventListener("input", () => {
-
-  const naziv =
-    posiljalacInput.value.trim().toLowerCase();
-
-  posiljalacInput.value =
-    naziv;
-
-  localStorage.setItem(
-    SACUVANI_EMAIL_KEY,
-    naziv
-  );
-
-  prikaziAdresu();
-
-});
-
-
-// PRIKAZ STATUSA
-
-function prikaziGresku(element, poruka) {
-
-  element.className = "error";
-  element.textContent = poruka;
+  element.textContent = message;
+  element.className = "message error";
 
 }
 
-function prikaziUspjeh(element, poruka) {
+function showSuccess(element, message) {
 
-  element.className = "success";
-  element.textContent = poruka;
+  element.textContent = message;
+  element.className = "message success";
+
+}
+
+function clearMessage(element) {
+
+  element.textContent = "";
+  element.className = "message";
 
 }
 
 
-// PRIKAZ ADMINISTRATORSKOG PANELA
+// ==================================================
+// PRIKAZ PANELA
+// ==================================================
 
-function prikaziAdminPanel(user) {
+function showLogin() {
+
+  loginPanel.style.display = "block";
+  adminPanel.style.display = "none";
+
+}
+
+function showAdmin(user) {
 
   loginPanel.style.display = "none";
   adminPanel.style.display = "block";
 
-  document.getElementById("loggedInEmail").textContent =
-    user.email;
+  document.getElementById(
+    "loggedInEmail"
+  ).textContent = user.email || "";
 
 }
 
 
-// PRIKAZ EKRANA ZA PRIJAVU
+// ==================================================
+// ADRESA POŠILJAOCA
+// ==================================================
 
-function prikaziLoginPanel() {
+const SAVED_SENDER_KEY =
+"docbizhub_posiljalac_email";
 
-  adminPanel.style.display = "none";
-  loginPanel.style.display = "block";
+const savedSender =
+localStorage.getItem(SAVED_SENDER_KEY);
+
+if (
+  savedSender &&
+  /^[a-zA-Z0-9._-]+$/.test(savedSender)
+) {
+
+  senderInput.value = savedSender;
 
 }
 
 
-// PROVJERA ADMINISTRATORA
+function updateSenderPreview() {
 
-async function provjeriAdministratora(session) {
+  const name =
+  senderInput.value.trim().toLowerCase();
 
-  if (!session || !session.user) {
+  document.getElementById(
+    "emailPreview"
+  ).textContent =
+  (name || "ponude") + "@docbizhub.com";
 
-    prikaziLoginPanel();
-    return false;
+}
 
-  }
 
-  const email =
-    session.user.email?.toLowerCase();
+updateSenderPreview();
 
-  if (email !== ADMIN_EMAIL.toLowerCase()) {
 
-    await supabase.auth.signOut();
+senderInput.addEventListener("input", function() {
 
-    prikaziLoginPanel();
+  senderInput.value =
+  senderInput.value.toLowerCase();
 
-    prikaziGresku(
-      loginStatus,
-      "Ovaj nalog nema administratorski pristup."
+  updateSenderPreview();
+
+  if (
+    /^[a-zA-Z0-9._-]*$/.test(senderInput.value)
+  ) {
+
+    localStorage.setItem(
+      SAVED_SENDER_KEY,
+      senderInput.value
     );
 
-    return false;
-
   }
 
-  prikaziAdminPanel(session.user);
-
-  return true;
-
-}
+});
 
 
-// PROVJERA POSTOJEĆE SESIJE
+// ==================================================
+// PRIJAVA
+// ==================================================
 
-async function ucitajSesiju() {
+loginForm.addEventListener(
+  "submit",
+  async function(event) {
 
-  const { data, error } =
-    await supabase.auth.getSession();
+    event.preventDefault();
 
-  if (error) {
+    clearMessage(loginMessage);
 
-    prikaziLoginPanel();
+    const email =
+    document.getElementById("email")
+      .value.trim();
 
-    prikaziGresku(
-      loginStatus,
-      "Greška prilikom provjere prijave."
-    );
+    const password =
+    document.getElementById("password")
+      .value;
 
-    return;
+    if (!email || !password) {
 
-  }
+      showError(
+        loginMessage,
+        "Unesite email adresu i lozinku."
+      );
 
-  await provjeriAdministratora(data.session);
+      return;
 
-}
+    }
 
+    loginButton.disabled = true;
 
-// AUTOMATSKA REAKCIJA NA PROMJENU SESIJE
+    loginButton.textContent =
+    "PRIJAVA U TOKU...";
 
-supabase.auth.onAuthStateChange(
-  (_event, session) => {
+    try {
 
-    if (session) {
+      const {
+        data,
+        error
+      } = await supabase.auth.signInWithPassword({
 
-      if (
-        session.user.email?.toLowerCase() ===
-        ADMIN_EMAIL.toLowerCase()
-      ) {
+        email: email,
+        password: password
 
-        prikaziAdminPanel(session.user);
+      });
 
-      } else {
+      if (error) throw error;
 
-        prikaziLoginPanel();
+      if (!data.user) {
 
-        supabase.auth.signOut();
+        throw new Error(
+          "Prijava nije uspjela."
+        );
 
       }
 
-    } else {
+      // Evidencija korisnika u postojećoj tabeli.
 
-      prikaziLoginPanel();
+      try {
+
+        const {
+          data: korisnik,
+          error: fetchError
+        } = await supabase
+          .from("POSAO_KORISNICI")
+          .select("USER")
+          .eq("USER", data.user.id)
+          .maybeSingle();
+
+        if (!fetchError && korisnik) {
+
+          const {
+            error: updateError
+          } = await supabase
+            .from("POSAO_KORISNICI")
+            .update({
+
+              IS_ONLINE: true,
+
+              LAST_SEEN:
+              new Date().toLocaleDateString()
+
+            })
+            .eq("USER", data.user.id);
+
+          if (updateError) {
+            console.warn(updateError);
+          }
+
+        }
+
+      } catch (profileError) {
+
+        console.warn(profileError);
+
+      }
+
+      document.getElementById(
+        "password"
+      ).value = "";
+
+      showAdmin(data.user);
+
+      showSuccess(
+        loginMessage,
+        "Uspješno ste prijavljeni."
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      showError(
+        loginMessage,
+        error.message ||
+        "Greška prilikom prijave."
+      );
+
+    } finally {
+
+      loginButton.disabled = false;
+
+      loginButton.textContent =
+      "PRIJAVI SE";
 
     }
 
@@ -528,280 +662,440 @@ supabase.auth.onAuthStateChange(
 );
 
 
-// ADMINISTRATORSKA PRIJAVA
+// ==================================================
+// ZABORAVLJENA LOZINKA
+// ==================================================
 
-loginForm.addEventListener("submit", async (event) => {
+document.getElementById(
+  "forgotButton"
+).addEventListener("click", async function() {
 
-  event.preventDefault();
-
-  loginStatus.className = "";
-
-  loginButton.disabled = true;
-  loginButton.textContent = "PRIJAVA U TOKU...";
+  clearMessage(loginMessage);
 
   const email =
-    document.getElementById("adminEmail")
-      .value.trim().toLowerCase();
+  document.getElementById("email")
+    .value.trim();
 
-  const password =
-    document.getElementById("adminPassword").value;
+  if (!email) {
 
-  try {
-
-    if (email !== ADMIN_EMAIL.toLowerCase()) {
-
-      throw new Error(
-        "Dozvoljena je samo administratorska adresa."
-      );
-
-    }
-
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-    if (error) {
-      throw error;
-    }
-
-    if (
-      !data.user ||
-      data.user.email?.toLowerCase() !==
-      ADMIN_EMAIL.toLowerCase()
-    ) {
-
-      await supabase.auth.signOut();
-
-      throw new Error(
-        "Nemaš administratorsko pravo pristupa."
-      );
-
-    }
-
-    prikaziAdminPanel(data.user);
-
-    document.getElementById("adminPassword").value = "";
-
-    prikaziUspjeh(
-      loginStatus,
-      "Uspješno si prijavljen."
+    showError(
+      loginMessage,
+      "Prvo unesite email adresu."
     );
 
-  } catch (error) {
-
-    prikaziGresku(
-      loginStatus,
-      error.message || "Prijava nije uspjela."
-    );
-
-  } finally {
-
-    loginButton.disabled = false;
-    loginButton.textContent = "PRIJAVI SE";
+    return;
 
   }
-
-});
-
-
-// ODJAVA ADMINISTRATORA
-
-logoutButton.addEventListener("click", async () => {
-
-  logoutButton.disabled = true;
-  logoutButton.textContent = "ODJAVA...";
 
   try {
 
     const { error } =
-      await supabase.auth.signOut();
+    await supabase.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo:
+        window.location.origin +
+        "/RESET_PASSWORD.html"
+      }
+    );
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
-    form.reset();
-
-    prikaziLoginPanel();
+    showSuccess(
+      loginMessage,
+      "Link za promjenu lozinke poslan je na vašu email adresu."
+    );
 
   } catch (error) {
 
-    alert(
-      error.message || "Greška prilikom odjave."
+    showError(
+      loginMessage,
+      error.message
     );
-
-  } finally {
-
-    logoutButton.disabled = false;
-    logoutButton.textContent = "ODJAVI SE";
 
   }
 
 });
 
 
-// SLANJE EMAILA
+// ==================================================
+// PREGLED PONUDE PRIJE SLANJA
+// ==================================================
 
-form.addEventListener("submit", async (event) => {
+document.getElementById(
+  "previewButton"
+).addEventListener("click", function() {
 
-  event.preventDefault();
+  clearMessage(status);
 
-  status.className = "";
+  const recipient =
+  document.getElementById("primalac")
+    .value.trim();
 
-  const { data: sessionData, error: sessionError } =
-    await supabase.auth.getSession();
+  const senderName =
+  senderInput.value.trim();
 
-  if (sessionError || !sessionData.session) {
+  const subject =
+  document.getElementById("subject")
+    .value.trim();
 
-    prikaziLoginPanel();
+  const text =
+  document.getElementById("tekst")
+    .value.trim();
 
-    prikaziGresku(
+  if (
+    !recipient ||
+    !senderName ||
+    !subject ||
+    !text
+  ) {
+
+    showError(
       status,
-      "Prijava je istekla. Ponovo se prijavi."
+      "Popunite sva polja prije pregleda."
     );
 
     return;
 
   }
 
-  const admin =
-    await provjeriAdministratora(sessionData.session);
+  if (!/^[a-zA-Z0-9._-]+$/.test(senderName)) {
 
-  if (!admin) {
+    showError(
+      status,
+      "Neispravan naziv adrese pošiljaoca."
+    );
+
     return;
+
   }
 
+  alert(
 
-  const primalac =
+    "PREGLED POSLOVNE PONUDE\n\n" +
+
+    "PRIMALAC:\n" +
+    recipient + "\n\n" +
+
+    "POŠILJALAC:\n" +
+    senderName + "@docbizhub.com\n\n" +
+
+    "NASLOV:\n" +
+    subject + "\n\n" +
+
+    "TEKST PONUDE:\n" +
+    text
+
+  );
+
+});
+
+
+// ==================================================
+// SLANJE POSLOVNE PONUDE
+// ==================================================
+
+offerForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+    clearMessage(status);
+
+    // Provjera aktivne sesije.
+
+    const {
+      data: sessionData,
+      error: sessionError
+    } = await supabase.auth.getSession();
+
+    if (
+      sessionError ||
+      !sessionData.session
+    ) {
+
+      showLogin();
+
+      showError(
+        loginMessage,
+        "Sesija je istekla. Prijavite se ponovo."
+      );
+
+      return;
+
+    }
+
+    const recipient =
     document.getElementById("primalac")
       .value.trim();
 
-  const nazivAdrese =
-    posiljalacInput.value.trim().toLowerCase();
+    const senderName =
+    senderInput.value.trim().toLowerCase();
 
-  const subject =
+    const subject =
     document.getElementById("subject")
       .value.trim();
 
-  const tekst =
+    const text =
     document.getElementById("tekst")
       .value.trim();
 
+    if (
+      !recipient ||
+      !senderName ||
+      !subject ||
+      !text
+    ) {
 
-  if (
-    !primalac ||
-    !nazivAdrese ||
-    !subject ||
-    !tekst
-  ) {
+      showError(
+        status,
+        "Popunite sva polja."
+      );
 
-    prikaziGresku(
-      status,
-      "Popuni sva polja."
+      return;
+
+    }
+
+    if (!/^[a-zA-Z0-9._-]+$/.test(senderName)) {
+
+      showError(
+        status,
+        "Neispravan naziv email adrese pošiljaoca."
+      );
+
+      return;
+
+    }
+
+    const sender =
+    senderName + "@docbizhub.com";
+
+
+    // OBAVEZNA POTVRDA KORISNIKA
+
+    const confirmed = confirm(
+
+      "DA LI POTVRĐUJETE SLANJE PONUDE?\n\n" +
+
+      "Firma: " + recipient + "\n\n" +
+
+      "Naslov: " + subject + "\n\n" +
+
+      "Tekst ponude:\n" + text
+
     );
 
-    return;
-
-  }
+    if (!confirmed) return;
 
 
-  if (!/^[a-z0-9._-]+$/i.test(nazivAdrese)) {
-
-    prikaziGresku(
-      status,
-      "Neispravan naziv email adrese."
+    localStorage.setItem(
+      SAVED_SENDER_KEY,
+      senderName
     );
 
-    return;
 
-  }
+    sendButton.disabled = true;
 
-
-  const posiljalac =
-    nazivAdrese + "@docbizhub.com";
+    sendButton.textContent =
+    "SLANJE U TOKU...";
 
 
-  localStorage.setItem(
-    SACUVANI_EMAIL_KEY,
-    nazivAdrese
-  );
+    try {
 
+      // POZIV POSTOJEĆE EDGE FUNCTION
 
-  sendButton.disabled = true;
-  sendButton.textContent = "SLANJE U TOKU...";
-
-
-  try {
-
-    const { data, error } =
-      await supabase.functions.invoke(
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke(
         FUNCTION_NAME,
         {
           body: {
+
             action: "POSALJI",
-            primalac: primalac,
-            posiljalac: posiljalac,
+
+            primalac: recipient,
+
+            posiljalac: sender,
+
             subject: subject,
-            tekst: tekst
+
+            tekst: text
+
           }
         }
       );
 
 
-    if (error) {
+      if (error) {
 
-      throw new Error(
-        data?.error ||
+        throw new Error(
+          data?.error ||
+          error.message ||
+          "Greška prilikom slanja emaila."
+        );
+
+      }
+
+
+      if (!data?.success) {
+
+        throw new Error(
+          data?.error ||
+          "Email nije poslan."
+        );
+
+      }
+
+
+      showSuccess(
+        status,
+
+        "Email je uspješno poslan firmi: " +
+        (data.primalac || recipient)
+      );
+
+
+      document.getElementById(
+        "primalac"
+      ).value = "";
+
+      document.getElementById(
+        "subject"
+      ).value = "";
+
+      document.getElementById(
+        "tekst"
+      ).value = "";
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showError(
+        status,
         error.message ||
-        "Greška prilikom slanja."
+        "Došlo je do greške prilikom slanja."
       );
+
+    } finally {
+
+      sendButton.disabled = false;
+
+      sendButton.textContent =
+      "POŠALJI PONUDU FIRMI";
 
     }
 
-
-    if (!data?.success) {
-
-      throw new Error(
-        data?.error || "Email nije poslan."
-      );
-
-    }
+  }
+);
 
 
-    prikaziUspjeh(
-      status,
-      "Email je uspješno poslan firmi: " +
-      (data.primalac || primalac)
-    );
+// ==================================================
+// ODJAVA
+// ==================================================
 
+document.getElementById(
+  "logoutButton"
+).addEventListener("click", async function() {
 
-    document.getElementById("primalac").value = "";
-    document.getElementById("subject").value = "";
-    document.getElementById("tekst").value = "";
+  const confirmed = confirm(
+    "Da li se želite odjaviti?"
+  );
 
+  if (!confirmed) return;
+
+  try {
+
+    const { error } =
+    await supabase.auth.signOut();
+
+    if (error) throw error;
+
+    offerForm.reset();
+
+    showLogin();
 
   } catch (error) {
 
-    prikaziGresku(
-      status,
-      error.message || "Došlo je do greške."
+    alert(
+      error.message ||
+      "Greška prilikom odjave."
     );
-
-  } finally {
-
-    sendButton.disabled = false;
-    sendButton.textContent = "POŠALJI EMAIL FIRMI";
 
   }
 
 });
 
 
-// POKRETANJE
+// ==================================================
+// PROVJERA SUPABASE SESIJE
+// ==================================================
 
-ucitajSesiju();
+async function initialize() {
+
+  const {
+    data,
+    error
+  } = await supabase.auth.getSession();
+
+  if (error) {
+
+    showLogin();
+
+    showError(
+      loginMessage,
+      "Greška prilikom provjere prijave."
+    );
+
+    return;
+
+  }
+
+  if (data.session?.user) {
+
+    showAdmin(data.session.user);
+
+  } else {
+
+    showLogin();
+
+  }
+
+}
+
+
+// ==================================================
+// AUTOMATSKA PROMJENA SESIJE
+// ==================================================
+
+supabase.auth.onAuthStateChange(
+  function(event, session) {
+
+    if (
+      event === "SIGNED_OUT" ||
+      !session
+    ) {
+
+      showLogin();
+
+    } else if (session.user) {
+
+      showAdmin(session.user);
+
+    }
+
+  }
+);
+
+
+// ==================================================
+// POKRETANJE
+// ==================================================
+
+initialize();
 
 </script>
 
