@@ -267,18 +267,39 @@ button {
 // ==================================================
 // SUPABASE KONFIGURACIJA
 // ==================================================
+// SUPABASE POSTAVKE
 
 const SUPABASE_URL =
   "https://uduwpvdjmanrgpumdrfh.supabase.co";
 
-const SUPABASE_ANON_KEY =
-  "sb_publishable_IfX6dxz-ILfYK_3VgelcMw_tYOX0y45";
+const SUPABASE_PUBLISHABLE_KEY =
+  "OVDJE_ZALIJEPI_CIJELI_PUBLISHABLE_KEY_IZ_SUPABASE";
 
-const FUNCTION_NAME =
-  "SALJI_MAIL_FIRMAMA_BEZ_AI_GENERISANJA_PORUKA";
+const ADMIN_UUID =
+  "526b4d88-d95a-43d4-a43b-0cdf2306a245";
 
-const SENDER_DOMAIN = "docbizhub.com";
+// PROVJERA POSTAVKI
 
+if (
+  !SUPABASE_URL.startsWith("https://") ||
+  !SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_")
+) {
+  throw new Error("Supabase URL ili Publishable API ključ nisu ispravno postavljeni.");
+}
+
+// KREIRANJE SUPABASE KLIJENTA
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  }
+);
 
 // ==================================================
 // PROVJERA I KREIRANJE SUPABASE KLIJENTA
