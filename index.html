@@ -250,9 +250,14 @@ button:disabled {
             <input type="email" id="primalac"
                    placeholder="firma@example.com" required>
 
-            <label for="posiljalac">Naziv pošiljaoca</label>
+            <label for="posiljalac">Email pošiljaoca (unesite dio prije @)</label>
             <input type="text" id="posiljalac"
-                   value="DOCBIZHUB" required>
+                   value="ponude" placeholder="npr. ponude ili marketing"
+                   autocomplete="off" required>
+            <small style="display:block;margin-top:6px;color:#64748b;">
+                Sistem će automatski dodati @docbizhub.com i poslati poruku
+                sa te adrese. Naziv DOCBIZHUB prikazivat će se uz adresu pošiljaoca.
+            </small>
 
             <label for="subject">Naslov emaila</label>
             <input type="text" id="subject"
@@ -599,7 +604,7 @@ offerForm.addEventListener("submit", async function(event) {
     const primalac =
     document.getElementById("primalac").value.trim();
 
-    const senderName = senderInput.value.trim();
+    const senderName = senderInput.value.trim().toLowerCase();
 
     const subject =
     document.getElementById("subject").value.trim();
@@ -627,8 +632,8 @@ offerForm.addEventListener("submit", async function(event) {
         return;
     }
 
-    const posiljalac =
-    senderName + " <ponude@" + SENDER_DOMAIN + ">";
+    const emailPosiljaoca = senderName + "@" + SENDER_DOMAIN;
+    const posiljalac = "DOCBIZHUB <" + emailPosiljaoca + ">";
 
     const potvrda = confirm(
         "Da li ste sigurni da želite poslati ovu ponudu?\n\n" +
@@ -708,7 +713,7 @@ offerForm.addEventListener("submit", async function(event) {
         );
 
         offerForm.reset();
-        senderInput.value = "DOCBIZHUB";
+        senderInput.value = "ponude";
 
     } catch (error) {
 
